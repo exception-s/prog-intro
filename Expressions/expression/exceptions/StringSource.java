@@ -1,4 +1,4 @@
-package expression.parser;
+package expression.exceptions;
 
 public class StringSource implements CharSource {
     private final String data;

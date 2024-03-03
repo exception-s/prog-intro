@@ -1,4 +1,4 @@
-package expression.parser;
+package expression.exceptions;
 
 public class BaseParser {
     private static final char END = '\0';

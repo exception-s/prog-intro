@@ -1,11 +1,12 @@
-package expression.parser;
+package expression.exceptions;
 
 import base.Selector;
 import expression.TripleExpression;
+import expression.parser.TripleParser;
 
 import java.util.function.Consumer;
 
-import static expression.parser.Operations.*;
+import static expression.exceptions.Operations.*;
 
 /**
  * @author Georgiy Korneev (kgeorgiy@kgeorgiy.info)

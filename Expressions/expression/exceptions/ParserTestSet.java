@@ -1,4 +1,4 @@
-package expression.parser;
+package expression.exceptions;
 
 import base.*;
 import expression.ToMiniString;

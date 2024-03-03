@@ -1,6 +1,7 @@
-package expression.parser;
+package expression.exceptions;
 
 import expression.*;
+import expression.parser.TripleParser;
 
 
 public class ExpressionParser implements TripleParser {
@@ -31,10 +32,10 @@ public class ExpressionParser implements TripleParser {
                 final GeneralExpression second = term();
                 switch (operation) {
                     case '+' -> {
-                        first = new Add(first, second);
+                        first = new CheckedAdd(first, second);
                     }
                     case '-' -> {
-                        first = new Subtract(first, second);
+                        first = new CheckedSubtract(first, second);
                     }
                     default -> throw error("Unexpected operation");
                 }
@@ -65,10 +66,10 @@ public class ExpressionParser implements TripleParser {
                     skipWhitespace();
                     switch (operation) {
                         case '*' -> {
-                            first = new Multiply(first, second);
+                            first = new CheckedMultiply(first, second);
                         }
                         case '/' -> {
-                            first = new Divide(first, second);
+                            first = new CheckedDivide(first, second);
                         }
                         default -> throw error("Unexpected operation");
                     }
@@ -107,18 +108,18 @@ public class ExpressionParser implements TripleParser {
             if (take('(')) {
                 final GeneralExpression result = expression();
                 expect(')');
-                return new UnaryMinus(result);
+                return new CheckedNegate(result);
             } else if (take('-')) {
                 final GeneralExpression result = negate();
-                return new UnaryMinus(result);
+                return new CheckedNegate(result);
             } else {
                 skipWhitespace();
                 if (take('x')) {
-                    return new UnaryMinus(new Variable("x"));
+                    return new CheckedNegate(new Variable("x"));
                 } else if (take('y')) {
-                    return new UnaryMinus(new Variable("y"));
+                    return new CheckedNegate(new Variable("y"));
                 } else if (take('z')) {
-                    return new UnaryMinus(new Variable("z"));
+                    return new CheckedNegate(new Variable("z"));
                 } else {
                     return new Const(parseConst(true));
                 }

@@ -1,22 +1,23 @@
 package expression;
 
 
-import expression.parser.ExpressionParser;
+import expression.exceptions.*;
 
 public class Main {
     public static void main(String[] args) {
-        String expression = "- -1";
-        // test     - -(x + -2147483648) + x * x * - 100
-        //   - -(x + -2147483648) + x * (x * - 100)
-
-        //   -((-((x + -2147483648)) + ((x * x) * -100)))
-
-        // x=-1856142235, y=-631464331, z=230294236
-
-        //       expected `-1609149535`,
-        //       actual `-2103134935`
+        String expression = "-(-2147483648)";
         ExpressionParser parser = new ExpressionParser();
-        System.out.println(parser.parse(expression).toString());
-        // System.out.println(parser.parse(expression).evaluate(-1856142235, 0, 0));
+        // System.out.println(parser.parse(expression).toString());
+        TripleExpression result = parser.parse(expression);
+        System.out.println(result.equals(new CheckedNegate(new Const(Integer.MIN_VALUE))));
+        System.out.println('x' + " ".repeat(8) + "f");
+        for (int i = 0; i < 10; i++) {
+            System.out.print(i + " ".repeat(8));
+            try {
+                System.out.println(result.evaluate(i, 0, 0));
+            } catch (OverflowException | DivisionByZeroException e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 }
