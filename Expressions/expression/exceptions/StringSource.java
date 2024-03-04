@@ -17,7 +17,7 @@ public class StringSource implements CharSource {
     }
 
     @Override
-    public IllegalArgumentException error(final String message) {
-        return new IllegalArgumentException(message);
+    public IllegalArgumentException error(final String message, final char c) {
+        return new IllegalArgumentException(message + "'" + c + "'" + " instead");
     }
 }

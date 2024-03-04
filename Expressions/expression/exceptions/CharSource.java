@@ -3,5 +3,5 @@ package expression.exceptions;
 public interface CharSource {
     boolean hasNext();
     char next();
-    IllegalArgumentException error(String message);
+    IllegalArgumentException error(String message, char c);
 }

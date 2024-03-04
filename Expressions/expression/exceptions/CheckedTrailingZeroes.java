@@ -9,7 +9,7 @@ public class CheckedTrailingZeroes extends AbstractCheckedUnaryOp {
 
     @Override
     protected String getOperation() {
-        return "t0 ";
+        return "t0";
     }
 
     @Override

@@ -20,7 +20,7 @@ public class ExpressionParser implements TripleParser {
             if (eoe()) {
                 return result;
             }
-            throw error("End of expression expected");
+            throw error("End of expression expected, found ");
         }
 
 
@@ -37,7 +37,7 @@ public class ExpressionParser implements TripleParser {
                     case '-' -> {
                         first = new CheckedSubtract(first, second);
                     }
-                    default -> throw error("Unexpected operation");
+                    default -> throw error("Unexpected operation: ");
                 }
             }
             skipWhitespace();
@@ -51,7 +51,7 @@ public class ExpressionParser implements TripleParser {
             skipWhitespace();
             if (take('(')) {
                 final GeneralExpression result = expression();
-                expect(')');
+                expect("()");
                 take();
                 return result;
             } else {
@@ -71,7 +71,7 @@ public class ExpressionParser implements TripleParser {
                         case '/' -> {
                             first = new CheckedDivide(first, second);
                         }
-                        default -> throw error("Unexpected operation");
+                        default -> throw error("Unexpected operation: ");
                     }
                 }
                 return first;
@@ -83,13 +83,25 @@ public class ExpressionParser implements TripleParser {
             skipWhitespace();
             if (take('-')) {
                 return negate();
-            } else {
+            } else if (take('l')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                return LeadingZ();
+            } else if (take('t')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                return TrailingZ();
+            }
+            else {
                 if (take('(')) {
                     final GeneralExpression result = expression();
                     expect(')');
                     return result;
                 } else {
-                    skipWhitespace();
                     if (take('x')) {
                         return new Variable("x");
                     } else if (take('y')) {
@@ -103,6 +115,7 @@ public class ExpressionParser implements TripleParser {
             }
         }
 
+
         private GeneralExpression negate() {
             skipWhitespace();
             if (take('(')) {
@@ -112,8 +125,94 @@ public class ExpressionParser implements TripleParser {
             } else if (take('-')) {
                 final GeneralExpression result = negate();
                 return new CheckedNegate(result);
+            } else if (take('l')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                final GeneralExpression result = LeadingZ();
+                return new CheckedNegate(result);
+            } else if (take('t')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                final GeneralExpression result = TrailingZ();
+                return new CheckedNegate(result);
             } else {
-                skipWhitespace();
+                if (take('x')) {
+                    return new CheckedNegate(new Variable("x"));
+                } else if (take('y')) {
+                    return new CheckedNegate(new Variable("y"));
+                } else if (take('z')) {
+                    return new CheckedNegate(new Variable("z"));
+                } else {
+                    return new Const(parseConst(true));
+                }
+            }
+        }
+
+
+        private GeneralExpression LeadingZ() {
+            skipWhitespace();
+            if (take('(')) {
+                final GeneralExpression result = expression();
+                expect(')');
+                return new CheckedLeadingZeroes(result);
+            } else if (take('-')) {
+                final GeneralExpression result = negate();
+                return new CheckedLeadingZeroes(result);
+            } else if (take('l')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                final GeneralExpression result = LeadingZ();
+                return new CheckedLeadingZeroes(result);
+            } else if (take('t')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                final GeneralExpression result = TrailingZ();
+                return new CheckedLeadingZeroes(result);
+            } else {
+                if (take('x')) {
+                    return new CheckedNegate(new Variable("x"));
+                } else if (take('y')) {
+                    return new CheckedNegate(new Variable("y"));
+                } else if (take('z')) {
+                    return new CheckedNegate(new Variable("z"));
+                } else {
+                    return new Const(parseConst(true));
+                }
+            }
+        }
+
+        private GeneralExpression TrailingZ() {
+            skipWhitespace();
+            if (take('(')) {
+                final GeneralExpression result = expression();
+                expect(')');
+                return new CheckedTrailingZeroes(result);
+            } else if (take('-')) {
+                final GeneralExpression result = negate();
+                return new CheckedTrailingZeroes(result);
+            } else if (take('l')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                final GeneralExpression result = LeadingZ();
+                return new CheckedTrailingZeroes(result);
+            } else if (take('t')) {
+                expect('0');
+                if (!test('(')) {
+                    expect(' ');
+                }
+                final GeneralExpression result = TrailingZ();
+                return new CheckedTrailingZeroes(result);
+            } else {
                 if (take('x')) {
                     return new CheckedNegate(new Variable("x"));
                 } else if (take('y')) {
@@ -155,7 +254,7 @@ public class ExpressionParser implements TripleParser {
             } else if (between('1', '9')) {
                 takeDigits(sb);
             } else {
-                throw error("Invalid number");
+                throw error("Expected digit, found ");
             }
         }
     }

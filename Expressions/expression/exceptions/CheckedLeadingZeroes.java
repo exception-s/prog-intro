@@ -9,7 +9,7 @@ public class CheckedLeadingZeroes extends AbstractCheckedUnaryOp {
 
     @Override
     protected String getOperation() {
-        return "l0 ";
+        return "l0";
     }
 
     @Override

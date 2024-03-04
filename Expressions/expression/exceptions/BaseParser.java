@@ -30,7 +30,7 @@ public class BaseParser {
 
     protected void expect(final char expected) {
         if (!take(expected)) {
-            throw error("Expected '" + expected + "', found '" + ch + "'");
+            throw error("Expected '" + expected + "', found ");
         }
     }
 
@@ -45,7 +45,7 @@ public class BaseParser {
     }
 
     protected IllegalArgumentException error(final String message) {
-        return source.error(message);
+        return source.error(message, ch);
     }
     protected void skipWhitespace() {
         while (Character.isWhitespace(ch)) {
