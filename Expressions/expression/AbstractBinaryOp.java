@@ -24,11 +24,9 @@ public abstract class AbstractBinaryOp implements GeneralExpression {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("(").append(first).append(" ")
-                .append(getOperation()).append(" ")
-                .append(second).append(")");
-        return sb.toString();
+        return "(" + first + " " +
+                getOperation() + " " +
+                second + ")";
     }
 
     @Override

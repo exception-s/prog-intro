@@ -20,4 +20,5 @@ public class CheckedNegate extends AbstractCheckedUnaryOp {
             return -x;
         }
     }
+
 }

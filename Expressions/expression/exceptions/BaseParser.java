@@ -47,6 +47,7 @@ public class BaseParser {
     protected IllegalArgumentException error(final String message) {
         return source.error(message, ch);
     }
+
     protected void skipWhitespace() {
         while (Character.isWhitespace(ch)) {
             take();

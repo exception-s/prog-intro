@@ -3,11 +3,9 @@ package expression.exceptions;
 import expression.*;
 import expression.parser.TripleParser;
 
-
 public class ExpressionParser implements TripleParser {
     @Override
     public TripleExpression parse(String expression) {
-        //System.err.println(expression);
         return new Parser(new StringSource(expression)).parseExpression();
     }
 
@@ -15,238 +13,90 @@ public class ExpressionParser implements TripleParser {
         protected Parser(CharSource source) {
             super(source);
         }
+
         public TripleExpression parseExpression() {
-            final TripleExpression result = expression();
-            if (eoe()) {
-                return result;
+            final TripleExpression expr = parseAddSub();
+            if (!eoe()) {
+                throw error("Unexpected characters at the end: '" + remaining() + "'");
             }
-            throw error("End of expression expected, found ");
+            return expr;
         }
 
-
-        private GeneralExpression expression() {
-            GeneralExpression first = term();
-            skipWhitespace();
-            while (!eoe() && !test(')')) {
-                char operation = take();
-                final GeneralExpression second = term();
-                switch (operation) {
-                    case '+' -> {
-                        first = new CheckedAdd(first, second);
-                    }
-                    case '-' -> {
-                        first = new CheckedSubtract(first, second);
-                    }
-                    default -> throw error("Unexpected operation: ");
-                }
-            }
-            skipWhitespace();
-            return first;
+        private boolean testDigit() {
+            return between('0', '9');
         }
 
-
-        private GeneralExpression term() {
-            skipWhitespace();
-            GeneralExpression first = factor();
-            skipWhitespace();
-            if (take('(')) {
-                final GeneralExpression result = expression();
-                expect("()");
-                take();
-                return result;
-            } else {
-                while (!eoe() && !test(')')) {
-                    skipWhitespace();
-                    if (test('+') || test('-')) {
-                        return first;
-                    }
-                    char operation = take();
-                    skipWhitespace();
-                    final GeneralExpression second = factor();
-                    skipWhitespace();
-                    switch (operation) {
-                        case '*' -> {
-                            first = new CheckedMultiply(first, second);
-                        }
-                        case '/' -> {
-                            first = new CheckedDivide(first, second);
-                        }
-                        default -> throw error("Unexpected operation: ");
-                    }
-                }
-                return first;
-            }
-        }
-
-
-        private GeneralExpression factor() {
-            skipWhitespace();
-            if (take('-')) {
-                return negate();
-            } else if (take('l')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                return LeadingZ();
-            } else if (take('t')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                return TrailingZ();
-            }
-            else {
-                if (take('(')) {
-                    final GeneralExpression result = expression();
-                    expect(')');
-                    return result;
-                } else {
-                    if (take('x')) {
-                        return new Variable("x");
-                    } else if (take('y')) {
-                        return new Variable("y");
-                    } else if (take('z')) {
-                        return new Variable("z");
-                    } else {
-                        return new Const(parseConst(false));
-                    }
-                }
-            }
-        }
-
-
-        private GeneralExpression negate() {
-            skipWhitespace();
-            if (take('(')) {
-                final GeneralExpression result = expression();
-                expect(')');
-                return new CheckedNegate(result);
-            } else if (take('-')) {
-                final GeneralExpression result = negate();
-                return new CheckedNegate(result);
-            } else if (take('l')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                final GeneralExpression result = LeadingZ();
-                return new CheckedNegate(result);
-            } else if (take('t')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                final GeneralExpression result = TrailingZ();
-                return new CheckedNegate(result);
-            } else {
-                if (take('x')) {
-                    return new CheckedNegate(new Variable("x"));
-                } else if (take('y')) {
-                    return new CheckedNegate(new Variable("y"));
-                } else if (take('z')) {
-                    return new CheckedNegate(new Variable("z"));
-                } else {
-                    return new Const(parseConst(true));
-                }
-            }
-        }
-
-
-        private GeneralExpression LeadingZ() {
-            skipWhitespace();
-            if (take('(')) {
-                final GeneralExpression result = expression();
-                expect(')');
-                return new CheckedLeadingZeroes(result);
-            } else if (take('-')) {
-                final GeneralExpression result = negate();
-                return new CheckedLeadingZeroes(result);
-            } else if (take('l')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                final GeneralExpression result = LeadingZ();
-                return new CheckedLeadingZeroes(result);
-            } else if (take('t')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                final GeneralExpression result = TrailingZ();
-                return new CheckedLeadingZeroes(result);
-            } else {
-                if (take('x')) {
-                    return new CheckedNegate(new Variable("x"));
-                } else if (take('y')) {
-                    return new CheckedNegate(new Variable("y"));
-                } else if (take('z')) {
-                    return new CheckedNegate(new Variable("z"));
-                } else {
-                    return new Const(parseConst(true));
-                }
-            }
-        }
-
-        private GeneralExpression TrailingZ() {
-            skipWhitespace();
-            if (take('(')) {
-                final GeneralExpression result = expression();
-                expect(')');
-                return new CheckedTrailingZeroes(result);
-            } else if (take('-')) {
-                final GeneralExpression result = negate();
-                return new CheckedTrailingZeroes(result);
-            } else if (take('l')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                final GeneralExpression result = LeadingZ();
-                return new CheckedTrailingZeroes(result);
-            } else if (take('t')) {
-                expect('0');
-                if (!test('(')) {
-                    expect(' ');
-                }
-                final GeneralExpression result = TrailingZ();
-                return new CheckedTrailingZeroes(result);
-            } else {
-                if (take('x')) {
-                    return new CheckedNegate(new Variable("x"));
-                } else if (take('y')) {
-                    return new CheckedNegate(new Variable("y"));
-                } else if (take('z')) {
-                    return new CheckedNegate(new Variable("z"));
-                } else {
-                    return new Const(parseConst(true));
-                }
-            }
-        }
-
-
-        private void takeDigits(final StringBuilder sb) {
-            while (between('0', '9')) {
+        private String remaining() {
+            StringBuilder sb = new StringBuilder();
+            while (!eoe()) {
                 sb.append(take());
             }
+            return sb.toString();
         }
 
-
-        private int parseConst(boolean negate) {
-            skipWhitespace();
-            final StringBuilder sb;
-            if (negate) {
-                sb = new StringBuilder("-");
-            } else {
-                sb = new StringBuilder();
+        private GeneralExpression parseAddSub() {
+            GeneralExpression left = parseMulDiv();
+            while (true) {
+                skipWhitespace();
+                if (take('+')) {
+                    left = new CheckedAdd(left, parseMulDiv());
+                } else if (take('-')) {
+                    left = new CheckedSubtract(left, parseMulDiv());
+                } else {
+                    return left;
+                }
             }
-            takeConst(sb);
-            return Integer.parseInt(sb.toString());
         }
 
-        private void takeConst(final StringBuilder sb) {
+        private GeneralExpression parseMulDiv() {
+            GeneralExpression left = parseFactor();
+            while (true) {
+                skipWhitespace();
+                if (take('*')) {
+                    left = new CheckedMultiply(left, parseFactor());
+                } else if (take('/')) {
+                    left = new CheckedDivide(left, parseFactor());
+                } else {
+                    return left;
+                }
+            }
+        }
+
+        private GeneralExpression parseFunction() {
+            if (take('l')) {
+                expect('0');
+                return new CheckedLeadingZeroes(parseFactor());
+            } else if (take('t')) {
+                expect('0');
+                return new CheckedTrailingZeroes(parseFactor());
+            }
+            throw error("Unknown function");
+        }
+
+        private GeneralExpression parseFactor() {
+            skipWhitespace();
             if (take('-')) {
+                if (testDigit()) {
+                    return new Const(parseNumber(true));
+                } else {
+                    return new CheckedNegate(parseFactor());
+                }
+            } else if (take('(')) {
+                GeneralExpression expr = parseAddSub();
+                expect(')');
+                return expr;
+            } else if (testDigit()) {
+                return new Const(parseNumber(false));
+            } else if (test('l') || test('t')) {
+                return parseFunction();
+            } else {
+                return parseVariable();
+            }
+        }
+
+        private int parseNumber(boolean isNegative) {
+            final StringBuilder sb = new StringBuilder();
+            if (isNegative) {
                 sb.append('-');
             }
             if (take('0')) {
@@ -254,8 +104,23 @@ public class ExpressionParser implements TripleParser {
             } else if (between('1', '9')) {
                 takeDigits(sb);
             } else {
-                throw error("Expected digit, found ");
+                throw error("Ожидалась цифра");
             }
+            return Integer.parseInt(sb.toString());
+        }
+
+        private void takeDigits(StringBuilder sb) {
+            while (between('0', '9')) {
+                sb.append(take());
+            }
+        }
+
+        private GeneralExpression parseVariable() {
+            char var = take();
+            if (var != 'x' && var != 'y' && var != 'z') {
+                throw error("Unknown variable: " + var);
+            }
+            return new Variable(String.valueOf(var));
         }
     }
 }

@@ -3,7 +3,7 @@ import java.nio.charset.StandardCharsets;
 
 public class WordsScanner implements AutoCloseable {
     private final Reader READER;
-    public final char[] BUFFER = new char[1024];
+    public final char[] BUFFER = new char[128];
     private final StringBuilder DATA = new StringBuilder();
     public final StringBuilder S = new StringBuilder();
     private final String LINE_SEP = System.lineSeparator();

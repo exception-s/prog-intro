@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Reverse {
     public static void main(String[] args){
         try {
-            FScanner scan = new FScanner(System.in);
+            WordsScanner scan = new WordsScanner(System.in);
             String s;
             String[] arr = new String[1];
             int capacity = 1;
@@ -20,7 +20,7 @@ public class Reverse {
                 if (arr[i] != null) System.out.println(arr[i]);
             }
             scan.close();
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -3,7 +3,7 @@ import java.nio.charset.StandardCharsets;
 
 public class FScanner implements AutoCloseable {
     private final Reader READER;
-    public final char[] BUFFER = new char[512];
+    public final char[] BUFFER = new char[128];
     private final StringBuilder DATA = new StringBuilder();
     public final StringBuilder S = new StringBuilder();
     private final String LINE_SEP = System.lineSeparator();
@@ -20,20 +20,25 @@ public class FScanner implements AutoCloseable {
     public FScanner(String string) {
         READER = new StringReader(string);
     }
+
     public void close() throws IOException {
         READER.close();
     }
+
     void reset() throws IOException {
         pointer = 0;
         read = READER.read(BUFFER);
     }
+
     boolean isSeparator() throws IOException {
         while (sepID != LINE_SEP.length()) {
             if (BUFFER[pointer] == LINE_SEP.charAt(sepID)) {
                 S.append(BUFFER[pointer]);
                 sepID++;
                 pointer++;
-                if (pointer == read) reset();
+                if (pointer == read) {
+                    reset();
+                }
             }
             else {
                 this.pointer -= sepID - 1;
@@ -43,6 +48,7 @@ public class FScanner implements AutoCloseable {
         }
         return true;
     }
+
     boolean haveInput() throws IOException {   //test
         if (read < 0) {
             reset();
@@ -50,8 +56,11 @@ public class FScanner implements AutoCloseable {
         }
         return true;
     }
+
     public boolean hasNextLine() throws IOException {
-        if (BUFFER[0] == (char) 0) reset();
+        if (BUFFER[0] == (char) 0) {
+            reset();
+        }
         while (read > 0) {
             while (pointer < read) {
                 if (BUFFER[pointer] == LINE_SEP.charAt(sepID)) {
@@ -71,6 +80,7 @@ public class FScanner implements AutoCloseable {
         S.setLength(0);
         return !DATA.isEmpty();
     }
+
     public String nextLine() {
         String s = DATA.toString();
         DATA.setLength(0);
@@ -84,8 +94,11 @@ public class FScanner implements AutoCloseable {
             }
         }
     }
+
     public boolean hasNext() throws IOException{    //test
-        if (BUFFER[0] == (char) 0) reset();
+        if (BUFFER[0] == (char) 0) {
+            reset();
+        }
         skipWhitespaces();
         while (read > 0) {
             while (pointer < read && !Character.isWhitespace(BUFFER[pointer])) {
@@ -101,11 +114,13 @@ public class FScanner implements AutoCloseable {
         }
         return !S.isEmpty();
     }
+
     public String next() {      //test
         String str = S.toString();
         S.setLength(0);
         return str;
     }
+
     public int nextInt() {
         return Integer.parseInt(next());
     }
